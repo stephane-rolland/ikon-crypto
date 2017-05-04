@@ -6,6 +6,7 @@ module Lib
 import qualified Control.Concurrent.Timer as CCTi
 import qualified Control.Concurrent.Suspend.Lifted as CCSL
 import qualified Request as R
+import qualified Storage as S
 import Control.Type.Operator
 import qualified Control.Concurrent as CC
 import qualified Control.Monad as CM
@@ -25,8 +26,8 @@ onTimer :: CC.MVar () -> Bool -> IO ()
 onTimer cs isLooping = do
   putStrLn "requesting"
   req <- R.request
-  putStrLn $ show req
   putStrLn "request received"
+  S.store req
   CM.when isLooping $ do
     CC.putMVar cs ()
     return ()

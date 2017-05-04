@@ -27,6 +27,7 @@ library
                      , wreq
                      , lens
   other-modules:       Request
+                     , Storage
   extensions:          LambdaCase
                      , BangPatterns   
                      , DuplicateRecordFields

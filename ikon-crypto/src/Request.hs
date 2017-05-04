@@ -2,12 +2,12 @@ module Request where
 
 import Control.Lens
 import qualified Data.ByteString.Lazy as BL
-import qualified Network.Wreq as NW
+import Network.Wreq
 
 requestCryptoRates :: String
 requestCryptoRates = "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&"
 
-request :: IO (String)
+request :: IO (BL.ByteString)
 request = do
-  answer <- NW.get requestCryptoRates
-  return $ show answer
+  response <- get requestCryptoRates
+  return $ view responseBody response
