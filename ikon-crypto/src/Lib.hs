@@ -13,7 +13,7 @@ import qualified Control.Monad as CM
 
 loop :: Bool -> IO () 
 loop isLooping = do
-  putStrLn "this should write once"
+  putStrLn "Starting..."
   cs <- CC.newEmptyMVar
   _ <- CC.forkIO $ do
     let delay = CCSL.mDelay 1
@@ -23,8 +23,10 @@ loop isLooping = do
     
 onTimer :: CC.MVar () -> Bool -> IO ()
 onTimer cs isLooping = do
-  --req <- R.request
-  putStrLn "this should write several time"
+  putStrLn "requesting"
+  req <- R.request
+  putStrLn $ show req
+  putStrLn "request received"
   CM.when isLooping $ do
     CC.putMVar cs ()
     return ()

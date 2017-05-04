@@ -23,6 +23,9 @@ library
                      , timers
                      , suspend
                      , type-operators
+                     , bytestring
+                     , wreq
+                     , lens
   other-modules:       Request
   extensions:          LambdaCase
                      , BangPatterns   
