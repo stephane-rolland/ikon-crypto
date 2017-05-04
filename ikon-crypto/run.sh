@@ -1,4 +1,5 @@
 #!/bin/bash
 reset 
-stack exec ikon-crypto
+stack exec -- ikon-crypto /home/code/trade/rates/crypto/
+
 
