@@ -17,7 +17,7 @@ loop isLooping storageDirectory = do
   putStrLn "Starting..."
   cs <- CC.newEmptyMVar
   _ <- CC.forkIO $ do
-    let delay = CCSL.mDelay 1
+    let delay = CCSL.mDelay 30
     _ <- CCTi.repeatedTimer (onTimer cs isLooping storageDirectory) delay
     return ()
   CC.takeMVar cs
