@@ -11,6 +11,10 @@ main = do
   commandLineArgs <- SE.getArgs
   let isOnlyOnce = getIsOnlyOnce commandLineArgs
   let storageDirectory = getStorageDirectory commandLineArgs
+  let delay = getDelay commandLineArgs
+
+  putStrLn $ "will request rates every " ++ (show delay) ++ " minutes"
+  
   loop isOnlyOnce storageDirectory
 
 getIsOnlyOnce :: [String] -> Bool
@@ -23,5 +27,12 @@ getStorageDirectory args = head filtered
     predicate ('/':pth) = True
     predicate _ = False
     
-    
-    
+getDelay :: [String] -> Int
+getDelay args = read d :: Int
+  where
+    delayStr = head filtered
+    filtered = filter predicate args
+    predicate ('d':'e':'l':'a':'y':'=':_) = True
+    predicate _ = False
+    d = parseDelay delayStr
+    parseDelay s = drop 6 s

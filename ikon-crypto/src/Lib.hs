@@ -20,7 +20,6 @@ loop isLooping storageDirectory = do
     let delay = CCSL.mDelay 30
     _ <- CCTi.repeatedTimer (onTimer cs isLooping storageDirectory) delay
     return ()
-  putStrLn $ "exited with an exception !"  
   CC.takeMVar cs
     
 onTimer :: CC.MVar () -> Bool -> String -> IO ()
