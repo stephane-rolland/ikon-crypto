@@ -3,7 +3,7 @@ module Main where
 import Lib (loop)
 
 import qualified System.Environment as SE
-
+import qualified GHC.Int as GI
 
 
 main :: IO ()
@@ -15,7 +15,7 @@ main = do
 
   putStrLn $ "will request rates every " ++ (show delay) ++ " minutes"
   
-  loop isOnlyOnce storageDirectory
+  loop isOnlyOnce storageDirectory delay
 
 getIsOnlyOnce :: [String] -> Bool
 getIsOnlyOnce args = (not . null $ args) && any (\x -> x == "onlyonce") args
@@ -27,8 +27,8 @@ getStorageDirectory args = head filtered
     predicate ('/':pth) = True
     predicate _ = False
     
-getDelay :: [String] -> Int
-getDelay args = read d :: Int
+getDelay :: [String] -> GI.Int64
+getDelay args = read d :: GI.Int64
   where
     delayStr = head filtered
     filtered = filter predicate args

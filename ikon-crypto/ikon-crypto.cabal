@@ -28,6 +28,7 @@ library
                      , lens
                      , time
                      , directory
+                     , ghc
   other-modules:       Request
                      , Storage
   extensions:          LambdaCase

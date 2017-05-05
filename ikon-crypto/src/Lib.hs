@@ -10,14 +10,14 @@ import qualified Storage as S
 import Control.Type.Operator
 import qualified Control.Concurrent as CC
 import qualified Control.Monad as CM
+import qualified GHC.Int as GI
 
-
-loop :: Bool -> String -> IO () 
-loop isLooping storageDirectory = do
+loop :: Bool -> String -> GI.Int64 -> IO () 
+loop isLooping storageDirectory d = do
   putStrLn "Starting..."
   cs <- CC.newEmptyMVar
   _ <- CC.forkIO $ do
-    let delay = CCSL.mDelay 30
+    let delay = CCSL.mDelay d
     _ <- CCTi.repeatedTimer (onTimer cs isLooping storageDirectory) delay
     return ()
   CC.takeMVar cs
