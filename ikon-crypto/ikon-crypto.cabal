@@ -29,6 +29,7 @@ library
                      , time
                      , directory
                      , ghc
+                     , bzlib
   other-modules:       Request
                      , Storage
   extensions:          LambdaCase

@@ -1,13 +1,15 @@
 module Storage where
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy as DBL
+import qualified Data.ByteString.Lazy.Char8 as DBLC
 import qualified Data.Time.Clock as DTC
 import qualified Data.Time.Calendar as DTCa
 import qualified System.Directory as SD
+import qualified Codec.Compression.BZip as CCBZ
 
-store :: BL.ByteString -> String -> IO ()
+store :: DBL.ByteString -> String -> IO ()
 store s storageDirectory = do
   filepth <- getFilePath storageDirectory  
-  BL.putStrLn s
+  DBLC.putStrLn s  
   storeToFile filepth s
   putStrLn $ "stored to file = " ++ filepth
 
@@ -21,21 +23,23 @@ getFilePath dir = do
   let nbMinutes = (nbAllSeconds - nbHours * 3600) `div` 60 :: Integer 
   let nbSeconds = nbAllSeconds `mod` 60 :: Integer
   
-  let subdir = "coincap-crypto-rates/"
+  let subdir = "coincap-crypto-rates-bzip/"
   let fulldir = dir ++ subdir
 
   putStrLn $ "should create" ++ fulldir
   SD.createDirectoryIfMissing True fulldir
-  
   let filePath = fulldir ++
-                 (show d) ++ "#" ++
-                 (show nbHours) ++ ":" ++
-                 (show nbMinutes) ++ ":" ++
-                 (show nbSeconds) ++ ".crypto_rates"
+        (show d) ++ "#" ++
+        (showTime nbHours) ++ ":" ++
+        (showTime nbMinutes) ++ ":" ++
+        (showTime nbSeconds) ++ ".crypto_rates.bzip"
   return $ filePath
-  
-storeToFile :: String -> BL.ByteString -> IO ()
+  where
+    showTime x = (if x > 9 then show x else "0" ++ show x) 
+storeToFile :: String -> DBL.ByteString -> IO ()
 storeToFile pth bs = do
-  BL.writeFile pth bs
+  DBL.writeFile pth compresseByteString
   putStrLn $ "saved to " ++ pth
   return ()
+  where
+    compresseByteString = CCBZ.compress bs
