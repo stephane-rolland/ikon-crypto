@@ -9,9 +9,8 @@ import qualified Codec.Compression.BZip as CCBZ
 store :: DBL.ByteString -> String -> IO ()
 store s storageDirectory = do
   filepth <- getFilePath storageDirectory  
-  DBLC.putStrLn s  
+  putStrLn $ "received crypto rates, size = " ++ (show $ DBL.length s)
   storeToFile filepth s
-  putStrLn $ "stored to file = " ++ filepth
 
 getFilePath :: String -> IO (String)
 getFilePath dir = do
@@ -26,7 +25,7 @@ getFilePath dir = do
   let subdir = "coincap-crypto-rates-bzip/"
   let fulldir = dir ++ subdir
 
-  putStrLn $ "should create" ++ fulldir
+  putStrLn $ "check or create" ++ fulldir
   SD.createDirectoryIfMissing True fulldir
   let filePath = fulldir ++
         (show d) ++ "#" ++
@@ -36,6 +35,7 @@ getFilePath dir = do
   return $ filePath
   where
     showTime x = (if x > 9 then show x else "0" ++ show x) 
+
 storeToFile :: String -> DBL.ByteString -> IO ()
 storeToFile pth bs = do
   DBL.writeFile pth compresseByteString
@@ -43,3 +43,4 @@ storeToFile pth bs = do
   return ()
   where
     compresseByteString = CCBZ.compress bs
+

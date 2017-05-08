@@ -4,35 +4,51 @@ import Lib (loop)
 
 import qualified System.Environment as SE
 import qualified GHC.Int as GI
-
+import qualified UserConfig as C
+import qualified Encryption as E
+import qualified Control.Monad as CM
 
 main :: IO ()
 main = do
-  commandLineArgs <- SE.getArgs
-  let isOnlyOnce = getIsOnlyOnce commandLineArgs
-  let storageDirectory = getStorageDirectory commandLineArgs
-  let delay = getDelay commandLineArgs
 
-  putStrLn $ "will request rates every " ++ (show delay) ++ " minutes"
+  configPath <- getConfigPath
+  config <- C.readConfig configPath
+
+  putStrLn $ "Enter password:"
+  pwd <- getLine
+
+  let password = E.getPassword32 pwd
+  (isGoodPassword, isNewPassword) <- E.checkPassword config password
+
+  CM.when isNewPassword $ do
+    putStrLn $ "Please enter the K API key:"
+    kAPIKey <- getLine
+    E.createKAPIKey (C.kAPIKeyPath config) password kAPIKey
+
+  kAPIKey <- E.readKAPIKey (C.kAPIKeyPath config) password 
+
+  let config' = config { C.kAPIKey = kAPIKey } 
+
+  putStrLn $ "will request rates every " ++ (show $ C.delayRetrieveRates config) ++ " minutes"
   
-  loop isOnlyOnce storageDirectory delay
+  loop config'
 
-getIsOnlyOnce :: [String] -> Bool
-getIsOnlyOnce args = (not . null $ args) && any (\x -> x == "onlyonce") args
+readConfigPath :: IO String
+readConfigPath = do
+    commandLineArgs <- SE.getArgs
+    let configPath = getPath commandLineArgs
+    return configPath
 
-getStorageDirectory :: [String] -> String
-getStorageDirectory args = head filtered
+getPath :: [String] -> String
+getPath args = head filtered
   where
     filtered = filter predicate args
     predicate ('/':pth) = True
     predicate _ = False
-    
-getDelay :: [String] -> GI.Int64
-getDelay args = read d :: GI.Int64
-  where
-    delayStr = head filtered
-    filtered = filter predicate args
-    predicate ('d':'e':'l':'a':'y':'=':_) = True
-    predicate _ = False
-    d = parseDelay delayStr
-    parseDelay s = drop 6 s
+
+getConfigPath :: IO (String)
+getConfigPath = do
+  commandLineArgs <- SE.getArgs
+  let configPath = head commandLineArgs 
+  putStrLn $ "working in directory = " ++ configPath
+  return $ configPath 

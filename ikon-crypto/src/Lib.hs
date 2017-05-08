@@ -11,11 +11,24 @@ import Control.Type.Operator
 import qualified Control.Concurrent as CC
 import qualified Control.Monad as CM
 import qualified GHC.Int as GI
+import qualified UserConfig as C
 
-loop :: Bool -> String -> GI.Int64 -> IO () 
-loop isLooping storageDirectory d = do
+
+loop :: C.Config -> IO () 
+loop config = do
   putStrLn "Starting..."
   cs <- CC.newEmptyMVar
+
+  let isLooping = not $ C.isOnlyOnce config 
+  let storageDirectory = C.storageDirectory config
+  let key = C.kAPIKey config
+  let d = C.delayRetrieveRates config
+  putStrLn $ "working with API key = "
+  putStrLn $ "isLooping = " ++ (show isLooping)
+  -- run once
+  onTimer cs False storageDirectory
+
+  --run in loops
   _ <- CC.forkIO $ do
     let delay = CCSL.mDelay d
     _ <- CCTi.repeatedTimer (onTimer cs isLooping storageDirectory) delay

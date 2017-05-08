@@ -1,5 +1,5 @@
 #!/bin/bash
 reset 
-stack exec -- ikon-crypto /home/code/trade/rates/crypto/ delay=10
+stack exec -- ikon-crypto /home/code/src/ikon-crypto/simul
 
 
