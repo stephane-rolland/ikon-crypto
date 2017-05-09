@@ -33,9 +33,12 @@ library
                      , ghc
                      , bzlib
                      , crypto-simple
+                     , aeson
   other-modules:       Request
-                     , Storage
                      , Analyze
+                     , CryptoRate
+                     , CryptoRateString
+                     , Storage
   extensions:          LambdaCase
                      , BangPatterns   
                      , DuplicateRecordFields
@@ -59,11 +62,20 @@ test-suite spec
   ghc-options:         -Wall
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
+                    ,  src
   main-is:             Spec.hs
   build-depends:       base
                      , ikon-crypto
                      , hspec
                      , QuickCheck
+                     , aeson
+                     , bzlib
+                     , bytestring
+                     , time
+                     , directory
+  other-modules:       Storage
+                     , CryptoRate
+  extensions:          DeriveGeneric
 
 source-repository head
   type:     git

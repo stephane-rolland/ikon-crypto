@@ -41,7 +41,6 @@ loop config = do
     _ <- CCTi.repeatedTimer onTimerOrders delay
     return ()
 
-
   CC.takeMVar cs
 
 doRates :: String -> IO ()

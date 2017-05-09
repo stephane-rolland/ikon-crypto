@@ -7,6 +7,9 @@ import qualified System.Directory as SD
 import qualified Codec.Compression.BZip as CCBZ
 import qualified Control.Monad as CM
 
+type FileRate = (String,DBLC.ByteString)
+type FileRates = [FileRate]
+
 store :: DBL.ByteString -> String -> IO ()
 store s storageDirectory = do
   filepth <- getFilePath storageDirectory  
@@ -23,7 +26,6 @@ getFilePath dir = do
   let nbMinutes = (nbAllSeconds - nbHours * 3600) `div` 60 :: Integer 
   let nbSeconds = nbAllSeconds `mod` 60 :: Integer
   
-  let subdir = "coincap-crypto-rates-bzip/"
   let fulldir = getRatesDirectory dir 
 
   putStrLn $ "check or create" ++ fulldir
@@ -45,17 +47,24 @@ storeToFile pth bs = do
   where
     compresseByteString = CCBZ.compress bs
 
-
 getRatesDirectory :: String -> String
 getRatesDirectory dir = dir ++ "/coincap-crypto-rates-bzip/"
 
-getRates :: String -> IO ([String])
+
+getRates :: String -> IO FileRates
 getRates dir = do
   let fulldir = getRatesDirectory dir 
   files <- SD.getDirectoryContents fulldir
 
-  rates <- CM.mapM getRate files
+  let filesWithoutSpecials = filter (\x -> x /= "." && x /= "..") files 
+
+  putStrLn $ show filesWithoutSpecials
+  
+  rates <- CM.mapM (getRate fulldir) filesWithoutSpecials
   return rates
 
-getRate :: String -> IO String
-getRate s = return ""
+getRate :: String -> String -> IO FileRate
+getRate fd s = do
+  compressed <- DBL.readFile $ fd ++ "/" ++ s
+  let decompressed = CCBZ.decompress compressed
+  return (s, decompressed)
