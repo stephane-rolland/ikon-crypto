@@ -5,6 +5,7 @@ import qualified Data.Time.Clock as DTC
 import qualified Data.Time.Calendar as DTCa
 import qualified System.Directory as SD
 import qualified Codec.Compression.BZip as CCBZ
+import qualified Control.Monad as CM
 
 store :: DBL.ByteString -> String -> IO ()
 store s storageDirectory = do
@@ -23,7 +24,7 @@ getFilePath dir = do
   let nbSeconds = nbAllSeconds `mod` 60 :: Integer
   
   let subdir = "coincap-crypto-rates-bzip/"
-  let fulldir = dir ++ subdir
+  let fulldir = getRatesDirectory dir 
 
   putStrLn $ "check or create" ++ fulldir
   SD.createDirectoryIfMissing True fulldir
@@ -44,3 +45,17 @@ storeToFile pth bs = do
   where
     compresseByteString = CCBZ.compress bs
 
+
+getRatesDirectory :: String -> String
+getRatesDirectory dir = dir ++ "/coincap-crypto-rates-bzip/"
+
+getRates :: String -> IO ([String])
+getRates dir = do
+  let fulldir = getRatesDirectory dir 
+  files <- SD.getDirectoryContents fulldir
+
+  rates <- CM.mapM getRate files
+  return rates
+
+getRate :: String -> IO String
+getRate s = return ""

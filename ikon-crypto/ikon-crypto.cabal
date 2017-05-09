@@ -35,6 +35,7 @@ library
                      , crypto-simple
   other-modules:       Request
                      , Storage
+                     , Analyze
   extensions:          LambdaCase
                      , BangPatterns   
                      , DuplicateRecordFields

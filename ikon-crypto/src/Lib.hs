@@ -10,9 +10,8 @@ import qualified Storage as S
 import Control.Type.Operator
 import qualified Control.Concurrent as CC
 import qualified Control.Monad as CM
-import qualified GHC.Int as GI
 import qualified UserConfig as C
-
+import qualified Analyze as A
 
 loop :: C.Config -> IO () 
 loop config = do
@@ -22,27 +21,79 @@ loop config = do
   let isLooping = not $ C.isOnlyOnce config 
   let storageDirectory = C.storageDirectory config
   let key = C.kAPIKey config
-  let d = C.delayRetrieveRates config
+  let d  = C.delayRetrieveRates config
+  let dd = C.delayAnalyzeOrders config
   putStrLn $ "working with API key = "
   putStrLn $ "isLooping = " ++ (show isLooping)
+
   -- run once
-  onTimer cs False storageDirectory
+  doRates storageDirectory
+  doOrders
 
   --run in loops
   _ <- CC.forkIO $ do
     let delay = CCSL.mDelay d
-    _ <- CCTi.repeatedTimer (onTimer cs isLooping storageDirectory) delay
+    _ <- CCTi.repeatedTimer (onTimerRates cs isLooping storageDirectory) delay
     return ()
+
+  _ <- CC.forkIO $ do
+    let delay = CCSL.mDelay dd
+    _ <- CCTi.repeatedTimer onTimerOrders delay
+    return ()
+
+
   CC.takeMVar cs
-    
-onTimer :: CC.MVar () -> Bool -> String -> IO ()
-onTimer cs isLooping storageDirectory = do
-  putStrLn "requesting"
-  req <- R.request
-  putStrLn "request received"
-  S.store req storageDirectory
-  CM.when isLooping $ do
+
+doRates :: String -> IO ()
+doRates dir = do
+  requestRates dir
+  analyzeRates dir
+  automaticOrders
+  
+onTimerRates :: CC.MVar () -> Bool -> String -> IO ()
+onTimerRates cs isLooping storageDirectory = do
+  doRates storageDirectory
+  CM.when (not isLooping) $ do
     CC.putMVar cs ()
     return ()
   return ()
 
+doOrders :: IO ()
+doOrders = do
+  requestOrders
+  analyzeOrders
+  orderProposal
+  automaticOrders
+
+onTimerOrders :: IO ()
+onTimerOrders = do
+  doOrders
+  return ()
+
+requestRates :: String -> IO ()
+requestRates storageDirectory = do
+  putStrLn "requesting rates"
+  req <- R.request
+  putStrLn "rates received"
+  S.store req storageDirectory
+
+analyzeRates :: String -> IO ()
+analyzeRates storageDirectory = do
+  putStrLn "analyzing rates..."
+  A.analyze storageDirectory
+
+requestOrders :: IO ()
+requestOrders = do
+  putStrLn "requesting orders"
+
+analyzeOrders :: IO ()
+analyzeOrders = do
+  putStrLn "analyzing orders..."
+
+orderProposal :: IO ()
+orderProposal = do
+  putStrLn "order proposal"
+
+automaticOrders :: IO ()
+automaticOrders = do
+  putStrLn "automatic orders..."
