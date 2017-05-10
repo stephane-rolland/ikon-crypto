@@ -7,7 +7,18 @@ import qualified System.Directory as SD
 import qualified Codec.Compression.BZip as CCBZ
 import qualified Control.Monad as CM
 
-type FileRate = (String,DBLC.ByteString)
+import qualified Data.List as DL
+import qualified Data.Maybe as DM
+
+data FileRate = FileRate
+                {
+                  filepath :: String,
+                  bytestring :: DBLC.ByteString
+                }
+
+compareFileRate :: FileRate -> FileRate -> Ordering
+compareFileRate f f' = compare (filepath f) (filepath f')
+                
 type FileRates = [FileRate]
 
 store :: DBL.ByteString -> String -> IO ()
@@ -50,21 +61,31 @@ storeToFile pth bs = do
 getRatesDirectory :: String -> String
 getRatesDirectory dir = dir ++ "/coincap-crypto-rates-bzip/"
 
+getTextRatesDirectory :: String -> String
+getTextRatesDirectory dir = dir ++ "/coincap-crypto-rates/"
 
 getRates :: String -> IO FileRates
 getRates dir = do
+
   let fulldir = getRatesDirectory dir 
   files <- SD.getDirectoryContents fulldir
 
   let filesWithoutSpecials = filter (\x -> x /= "." && x /= "..") files 
 
-  putStrLn $ show filesWithoutSpecials
-  
   rates <- CM.mapM (getRate fulldir) filesWithoutSpecials
-  return rates
+  return $ DL.sortBy compareFileRate rates
 
 getRate :: String -> String -> IO FileRate
-getRate fd s = do
-  compressed <- DBL.readFile $ fd ++ "/" ++ s
+getRate fdir fname = do
+  compressed <- DBL.readFile $ fdir ++ "/" ++ fname
   let decompressed = CCBZ.decompress compressed
-  return (s, decompressed)
+  return $ FileRate fname decompressed
+
+extractDateTime :: String -> (String,String)
+extractDateTime filename = (date,time)
+  where
+    indexHash  = DL.elemIndex '#' filename
+    indexPoint = DL.elemIndex '.' filename
+    date = take (DM.fromJust indexHash) filename
+    time = drop (DM.fromJust indexHash + 1) $ take (DM.fromJust indexPoint) filename
+    
