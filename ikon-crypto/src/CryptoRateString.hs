@@ -8,7 +8,6 @@ import GHC.Generics
 import qualified Data.Maybe as DM
 import qualified CryptoRate as CR
 
-
 type CryptoRateStrings = [CryptoRateString]
 data CryptoRateString = CryptoRateString
                   {
@@ -31,7 +30,6 @@ data CryptoRateString = CryptoRateString
                     market_cap_eur :: Maybe String
                     }
                   deriving (Generic, Show)
-
 
 instance DA.FromJSON CryptoRateString where
   parseJSON = DA.genericParseJSON DA.defaultOptions { DAT.fieldLabelModifier = addPrefix }
@@ -93,22 +91,4 @@ getCryptoRates bs = case eitherCryptoRates of
     
     errorMsg = "crypto races not decoded from = " ++ jsondata
     jsondata = DBLC.unpack bs
-
-selectByName :: String -> CR.CryptoRates -> CR.CryptoRate
-selectByName nameCr crs = head $ filter predicate crs
-  where
-    predicate cr = case mn of
-                      Just c -> c == nameCr
-                      Nothing -> False
-      where
-        mn = CR.name cr
-
-selectByMarket :: Double -> CR.CryptoRates -> CR.CryptoRates
-selectByMarket i crs = filter predicate crs
-  where
-    predicate cr = case mm of
-                     Just c -> c >= i
-                     Nothing -> False
-      where
-        mm = CR.market_cap_usd cr 
 

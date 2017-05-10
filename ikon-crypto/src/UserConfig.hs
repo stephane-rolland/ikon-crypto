@@ -12,6 +12,7 @@ data Config = Config {
                        , delayRetrieveRates :: GI.Int64
                        , delayAnalyzeOrders :: GI.Int64
                        , kAPIKey :: String
+                       , listCurrenciesOfInterest :: [String]
                      }
               deriving (Show)
 
@@ -27,7 +28,11 @@ readConfig pth = do
   let delayAnalyzeOrders' = read (f "delayAnalyzeOrders") :: GI.Int64
   let passwordPath' = pth ++ "/.password"
   let kAPIKeyPath' = pth ++ "/.kapikey"
-  let cfg = Config pth passwordPath' kAPIKeyPath' onlyOnce' storageDirectory' delayRetrieveRates' delayAnalyzeOrders' ""
+
+  let allCurrenciesTokenized = f "listCurrenciesOfInterest"
+  let listCurrencies = words allCurrenciesTokenized
+  
+  let cfg = Config pth passwordPath' kAPIKeyPath' onlyOnce' storageDirectory' delayRetrieveRates' delayAnalyzeOrders' "" listCurrencies
 
   putStrLn $ "working with config" ++ (show cfg)
   return cfg
@@ -39,7 +44,7 @@ getConfigLine ls paramName = removeParamName paramName selected
     selected = head filtered
 
     predicate :: String -> String -> Bool
-    predicate paramName ss = ss `startsWith` (addEquals paramName) 
+    predicate pname ss = ss `startsWith` (addEquals pname) 
 
     startsWith :: String -> String -> Bool
     startsWith l p = l' == p
@@ -47,7 +52,7 @@ getConfigLine ls paramName = removeParamName paramName selected
         l' = take (length p) l
 
     removeParamName :: String -> String -> String
-    removeParamName paramName l = drop (length $ addEquals paramName) l
+    removeParamName pname l = drop (length $ addEquals pname) l
 
     addEquals :: String -> String
     addEquals ss = ss ++ " = "

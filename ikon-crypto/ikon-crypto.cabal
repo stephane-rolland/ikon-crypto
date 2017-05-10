@@ -39,6 +39,8 @@ library
                      , CryptoRate
                      , CryptoRateString
                      , Storage
+                     , CryptoCurrency
+                     , Global
   extensions:          LambdaCase
                      , BangPatterns   
                      , DuplicateRecordFields

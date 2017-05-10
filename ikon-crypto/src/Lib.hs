@@ -23,17 +23,18 @@ loop config = do
   let key = C.kAPIKey config
   let d  = C.delayRetrieveRates config
   let dd = C.delayAnalyzeOrders config
+  let lstCurrencies = C.listCurrenciesOfInterest config
   putStrLn $ "working with API key = "
   putStrLn $ "isLooping = " ++ (show isLooping)
 
   -- run once
-  doRates storageDirectory
+  doRates storageDirectory lstCurrencies
   doOrders
 
   --run in loops
   _ <- CC.forkIO $ do
     let delay = CCSL.mDelay d
-    _ <- CCTi.repeatedTimer (onTimerRates cs isLooping storageDirectory) delay
+    _ <- CCTi.repeatedTimer (onTimerRates cs isLooping storageDirectory lstCurrencies) delay
     return ()
 
   _ <- CC.forkIO $ do
@@ -43,15 +44,15 @@ loop config = do
 
   CC.takeMVar cs
 
-doRates :: String -> IO ()
-doRates dir = do
+doRates :: String -> [String] -> IO ()
+doRates dir lst = do
   requestRates dir
-  analyzeRates dir
+  analyzeRates dir lst
   automaticOrders
   
-onTimerRates :: CC.MVar () -> Bool -> String -> IO ()
-onTimerRates cs isLooping storageDirectory = do
-  doRates storageDirectory
+onTimerRates :: CC.MVar () -> Bool -> String -> [String] -> IO ()
+onTimerRates cs isLooping storageDirectory lst = do
+  doRates storageDirectory lst
   CM.when (not isLooping) $ do
     CC.putMVar cs ()
     return ()
@@ -76,10 +77,10 @@ requestRates storageDirectory = do
   putStrLn "rates received"
   S.store req storageDirectory
 
-analyzeRates :: String -> IO ()
-analyzeRates storageDirectory = do
+analyzeRates :: String -> [String] -> IO ()
+analyzeRates storageDirectory lst = do
   putStrLn "analyzing rates..."
-  A.analyze storageDirectory
+  A.analyze storageDirectory lst
 
 requestOrders :: IO ()
 requestOrders = do
