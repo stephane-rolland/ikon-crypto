@@ -26,7 +26,7 @@ data CryptoCurrencyHistory = CryptoCurrencyHistory
   }
 
 instance Show CryptoCurrencyHistory where
-  show (CryptoCurrencyHistory c h) = separator ++ newLine ++ displayCode ++ " => " ++ histospaced 
+  show (CryptoCurrencyHistory c h) = separator ++ newLine ++ displayCode ++ " = " ++ histospaced 
     where
       separator = replicate 80 '-'
       newLine = "\n"
@@ -61,13 +61,12 @@ getHistory crs = mkCryptoCurrency <$> selectedCrs
     selectedCrs = (\x -> crs !! (x-1)) <$> (reverse indexes)
 
 getIndexes :: Int -> [Int]
-getIndexes l = i ++ i' ++ i'' ++ i''' ++ i''''
+getIndexes l = i ++ i' ++ i'' ++ i''' 
   where
     i     = [1..9]
     i'    = [10,13..19]
-    i''   = [20,25..49]
-    i'''  = [50,60..99]
-    i'''' = [100,125..l]
+    i''   = [20,25..99]
+    i'''  = [100,120..l]
 
 mkCryptoCurrency :: CR.CryptoRate -> CryptoCurrency
 mkCryptoCurrency cr = c

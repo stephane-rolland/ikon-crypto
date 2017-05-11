@@ -59,7 +59,13 @@ instance Show GlobalVariation where
 
 type GlobalVariations = [GlobalVariation]
 
-
+getIndexes :: Int -> [Int]
+getIndexes l = i ++ i' ++ i'' ++ i''' 
+  where
+    i     = [1..9]
+    i'    = [10,13..19]
+    i''   = [20,25..99]
+    i'''  = [100,120..l]
 
 getGlobalVariations :: S.FileRates -> GlobalVariations
 getGlobalVariations fileRates = globalVariations 
@@ -71,9 +77,8 @@ getGlobalVariations fileRates = globalVariations
     selectFileRates :: S.FileRates -> S.FileRates
     selectFileRates frs = frs'
       where
+        indexes = getIndexes l
         l = length frs
-        indexesFar = [550,575..l]
-        indexes = [1,2,3,5,7,10,15,20,25,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,230,260,280,300,325,350,375,400,425,450,475,500,525] ++ indexesFar
         frs' = getFileRatesAtIndex frs $ DL.nub indexes
 
 getFileRatesAtIndex :: S.FileRates -> [Int] -> S.FileRates

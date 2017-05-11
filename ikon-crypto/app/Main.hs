@@ -20,6 +20,9 @@ main = do
   let password = E.getPassword32 pwd
   (isGoodPassword, isNewPassword) <- E.checkPassword config password
 
+  CM.guard isGoodPassword
+  putStrLn "Password is ok"
+
   CM.when isNewPassword $ do
     putStrLn $ "Please enter the K API key:"
     kAPIKey <- getLine
