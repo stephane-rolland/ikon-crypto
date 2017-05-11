@@ -34,6 +34,7 @@ library
                      , bzlib
                      , crypto-simple
                      , aeson
+                     , process
   other-modules:       Request
                      , Analyze
                      , CryptoRate

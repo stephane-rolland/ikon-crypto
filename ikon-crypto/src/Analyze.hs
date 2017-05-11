@@ -4,6 +4,7 @@ import qualified Storage as S
 
 import qualified Global as G
 import qualified CryptoCurrency as CC
+import qualified System.Process as SP
 
 data Analysis = Analysis
   {
@@ -16,8 +17,16 @@ instance Show Analysis where
   show (Analysis [] (l:ls)) = show l ++ "\n" ++ show (Analysis [] ls)
   show _ = "" 
 
+clear = putStr "\ESC[2J"
+
+clearScreen :: IO ()
+clearScreen = do
+  _ <- SP.system "reset"
+  return ()
+
 analyze :: String -> [String] -> IO ()
 analyze storageDirectory lstCurrencies = do
+  _ <- clearScreen
   putStrLn "_____________________________________________________________"
   putStrLn "analyzing"
   fileRates <- S.getRates storageDirectory
